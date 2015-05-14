@@ -158,7 +158,7 @@ import C2HS.Gen.Monad    (TransFun, transTabToTransFun, HsObject(..), GB,
                           GBState(..), Wrapper(..),
                    initialGBState, setContext, getPrefix, getReplacementPrefix,
                    delayCode, getDelayedCode, ptrMapsTo, queryPtr, objIs,
-                   sizeIs, querySize, queryClass, queryPointer,
+                   queryClass, queryPointer,
                    mergeMaps, dumpMaps, queryEnum, isEnum,
                    queryTypedef, isC2HSTypedef,
                    queryDefaultMarsh, isDefaultMarsh, addWrapper, getWrappers)
@@ -739,9 +739,7 @@ expandHook hook@(CHSPointer isStar cName oalias ptrKind isNewtype oRefType emit
         hsName = identToString hsIde
 
     hsIde `objIs` Pointer ptrKind isNewtype     -- register Haskell object
-    decl <- findAndChaseDeclOrTag cName False True
-    (sz, _) <- sizeAlignOfPtr decl
-    hsIde `sizeIs` (padBits sz)
+    
     --
     -- we check for a typedef declaration or tag (struct, union, or enum)
     --
@@ -2269,7 +2267,6 @@ sizeAlignOfStructPad decls tag =
 -- | compute the size and alignment constraint of a given C declaration
 --
 sizeAlignOf       :: CDecl -> GB (BitSize, Int)
-sizeAlignOfPtr    :: CDecl -> GB (BitSize, Int)
 sizeAlignOfBase   :: Bool -> CDecl -> GB (BitSize, Int)
 sizeAlignOfSingle :: Bool -> CDecl -> GB (BitSize, Int)
 --
@@ -2282,7 +2279,6 @@ sizeAlignOfSingle :: Bool -> CDecl -> GB (BitSize, Int)
 --   declared.  At this time I don't care.  -- U.S. 05/2006
 --
 sizeAlignOf = sizeAlignOfBase False
-sizeAlignOfPtr = sizeAlignOfBase True
 sizeAlignOfBase _ (CDecl dclspec
                          [(Just (CDeclr oide (CArrDeclr _ (CArrSize _ lexpr) _ :
                                               derived') _asm _ats n), init', expr)]

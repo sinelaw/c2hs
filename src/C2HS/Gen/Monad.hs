@@ -74,7 +74,7 @@ module C2HS.Gen.Monad (
   HsObject(..), Wrapper(..), GB, GBState(..),
   initialGBState, setContext, getLibrary, getPrefix,
   getReplacementPrefix, delayCode, getDelayedCode, ptrMapsTo, queryPtr,
-  objIs, queryObj, sizeIs, querySize, queryClass, queryPointer,
+  objIs, queryObj, queryClass, queryPointer,
   mergeMaps, dumpMaps, queryEnum, isEnum,
   queryTypedef, isC2HSTypedef, queryDefaultMarsh, isDefaultMarsh,
   addWrapper, getWrappers
@@ -422,21 +422,6 @@ queryObj        :: Ident -> GB (Maybe HsObject)
 queryObj hsName  = do
                      fm <- readCT objmap
                      return $ Map.lookup hsName fm
-
--- | add an entry to the size map
---
-sizeIs :: Ident -> Int -> GB ()
-hsName `sizeIs` sz =
-  transCT (\state -> (state {
-                        szmap = Map.insert hsName sz (szmap state)
-                      }, ()))
-
--- | query the size map
---
-querySize       :: Ident -> GB (Maybe Int)
-querySize hsName  = do
-                     sm <- readCT szmap
-                     return $ Map.lookup hsName sm
 
 -- | query the Haskell object map for a class
 --
