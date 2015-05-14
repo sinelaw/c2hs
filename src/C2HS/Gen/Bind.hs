@@ -1267,18 +1267,14 @@ funDef isPure hsLexeme fiLexeme extTy varExtTys octxt parms
         marshBody (Right str) = "(" ++ str ++ ")"
       return (funArg, marshIn, callArgs, marshOut, retArg)
     marshArg i CHSPlusParm = do
-      msize <- querySize $ internalIdent hsParmTy
-      case msize of
-        Nothing -> interr "Missing size for \"+\" parameter allocation!"
-        Just sz -> do
-          let a = "a" ++ show (i :: Int)
-              bdr1 = a ++ "'"
-              bdr2 = a ++ "''"
-              marshIn = "mallocForeignPtrBytes " ++ show sz ++
-                        " >>= \\" ++ bdr2 ++
-                        " -> withForeignPtr " ++ bdr2 ++ " $ \\" ++
-                        bdr1 ++ " -> "
-          return ("", marshIn, [bdr1], "", hsParmTy ++ " " ++ bdr2)
+      let a = "a" ++ show (i :: Int)
+          bdr1 = a ++ "'"
+          bdr2 = a ++ "''"
+          marshIn = "mallocForeignPtrBytes (sizeOf (undefined :: " ++ hsParmTy ++ "))" ++
+                    " >>= \\" ++ bdr2 ++
+                    " -> withForeignPtr " ++ bdr2 ++ " $ \\" ++
+                    bdr1 ++ " -> "
+      return ("", marshIn, [bdr1], "", hsParmTy ++ " " ++ bdr2)
     marshArg _ _ = interr "GenBind.funDef: Missing default?"
     --
     traceMarsh parms' parm' isImpure = traceGenBind $
