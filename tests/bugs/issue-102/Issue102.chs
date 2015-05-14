@@ -30,6 +30,13 @@ import Foreign.C.Types
     {F_RDLCK as ReadLock, F_WRLCK as WriteLock, F_UNLCK as Unlocked}
           deriving (Eq, Ord, Show)#}
 {#pointer *flock as FLock foreign newtype#}
+
+instance Storable FLock where
+    sizeOf _ = {#sizeof flock#}
+    alignment _ = {#alignof flock#}
+    peek _ = error "Opaque type"
+    poke _ = error "Opaque type"
+             
 {#fun variadic fcntl[struct flock *] as
          f_get_lock {`Int', `Int', +} -> `FLock'#}
 {#fun variadic fcntl[struct flock *] as
